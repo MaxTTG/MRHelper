@@ -1,0 +1,30 @@
+name: MRHelper
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Build project
+        run: |
+          cmake -B ${{github.workspace}}/build \
+                -DBUILD_TESTING=ON \
+		-DBUILD_EXAMPLE=ON
+		cmake --build ${{github.workspace}}/build --config Release
+
+      - name: Run tests
+        run: |
+          cd ${{github.workspace}}/build
+          ctest --output-on-failure -C Release
